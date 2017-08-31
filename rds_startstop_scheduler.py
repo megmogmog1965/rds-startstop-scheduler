@@ -40,9 +40,10 @@ sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
 
 # command line args.
 _parser = argparse.ArgumentParser(description=u'auto start/stop RDS by "start_time" tag and "stop_time" tag.')
-_parser.add_argument(u'aws_access_key_id', help=u'aws access key id.')
-_parser.add_argument(u'aws_secret_access_key', help=u'aws secret access key.')
-_parser.add_argument(u'--region', default=u'ap-northeast-1', help=u'AWS Region Name.')
+_parser.add_argument(u'--aws-access-key-id', help=u'aws access key id.')
+_parser.add_argument(u'--aws-secret-access-key', help=u'aws secret access key.')
+_parser.add_argument(u'--region', default=u'us-east-1', help=u'AWS region name.')
+_parser.add_argument(u'--profile', help=u'AWS credential profile name')
 _parser.add_argument(u'--list', action='store_true', help=u'List all scheduled actions.')
 _args = _parser.parse_args()
 
@@ -90,12 +91,16 @@ def _aws_client():
     '''
     :rtype: :class:`boto3.client`
     '''
-    return boto3.client(
-        'rds',
-        aws_access_key_id=_args.aws_access_key_id,
-        aws_secret_access_key=_args.aws_secret_access_key,
-        region_name=_args.region
-    )
+    opt_params = {}
+    opt_params = dict(opt_params, profile_name=_args.profile) if _args.profile else opt_params
+    session = boto3.Session(**opt_params)
+
+    opt_params = {}
+    opt_params = dict(opt_params, aws_access_key_id=_args.aws_access_key_id) if _args.aws_access_key_id else opt_params
+    opt_params = dict(opt_params, aws_secret_access_key=_args.aws_secret_access_key) if _args.aws_secret_access_key else opt_params
+    opt_params = dict(opt_params, region_name=_args.region) if _args.region else opt_params
+
+    return session.client('rds', **opt_params)
 
 def _shutdown_instance(ins):
     ''' stop RDS instance '''
@@ -231,8 +236,8 @@ def _list_scheduled_actions(rds_list):
 
 if __name__ == '__main__':
     # "--list".
+    _list_scheduled_actions(_find_all_rds())
     if _args.list:
-        _list_scheduled_actions(_find_all_rds())
         sys.exit(0)
 
     # launch daemon.

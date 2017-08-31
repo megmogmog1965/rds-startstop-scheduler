@@ -27,9 +27,16 @@ $ pip install boto3 python-daemon --upgrade
 Then, run script.
 
 ```
-$ python rds_startstop_scheduler.py --region "REGION" "your-aws-access-key-id" "your-aws-secret-access-key"
+$ python rds_startstop_scheduler.py --region "REGION" --aws-access-key-id "your-aws-access-key-id" --aws-secret-access-key "your-aws-secret-access-key"
+```
+
+You can also use ``~/.aws/credentials`` [awscli] settings.
+
+```
+$ python rds_startstop_scheduler.py --region us-east-1 --profile default
 ```
 
 
 [pip]:https://pip.pypa.io/en/stable/installing/
 [Python 2.7.13]:https://www.python.org/downloads/release/python-2713/
+[awscli]:http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
