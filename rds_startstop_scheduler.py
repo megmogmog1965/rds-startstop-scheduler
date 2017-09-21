@@ -138,9 +138,15 @@ def _rds_generator_with_timetag(timetag):
     '''
     :return: an infinite generator of rds_object.
     '''
+    period = 60 * 60 # 1 hour.
     rds_list = []
+    last_fetched = datetime.datetime(1970, 1, 1)
+
     while True:
-        if not rds_list:
+        now = datetime.datetime.now()
+
+        if not rds_list or (now - last_fetched).seconds > period:
+            last_fetched = now
             rds_list = _try(lambda: _ordered_rds_list(timetag))()
             rds_list = rds_list if rds_list else []
             rds_list.reverse()
